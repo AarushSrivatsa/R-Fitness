@@ -28,7 +28,7 @@ cd backend
 python -m venv .venv
 # macOS/Linux
 source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
+# Windows PowerShell: .venv\\Scripts\\Activate.ps1
 pip install -r requirements-dev.txt
 cp .env.example .env
 ```
@@ -65,6 +65,7 @@ Set VITE_API_BASE_URL=http://localhost:8000. To use admin login locally, set the
 3. In Project Settings → API, copy the Project URL and anon/publishable key.
 4. Create an administrator in Authentication → Users. Copy that user's UUID into backend ADMIN_USER_IDS (comma-separated for multiple admins).
 5. The API validates access tokens with Supabase Auth and then checks the user's UUID against ADMIN_USER_IDS. Signing in alone does not grant admin permissions.
+6. The Alembic migrations enable Row Level Security on all application tables. Browser clients do not get direct table policies; the public website and admin dashboard access application data through FastAPI.
 
 Never use a service-role key in the browser. Never commit database passwords, access tokens, or .env files.
 
@@ -94,7 +95,7 @@ The API container applies Alembic migrations before starting Uvicorn. Render hea
 
 ## Before publishing
 
-The initial content uses the public business listing for the gym's name, address and phone. Confirm these with the owner before launch. Membership prices, exact services, trainer profiles, class schedules and Sunday hours are intentionally not invented; populate them after the owner confirms the details.
+The initial content uses the public business listing for the gym's name, address and phone. Confirm these with the owner before launch. Membership prices, exact services, trainer profiles, class schedules and Sunday hours are intentionally not invented; populate them after the owner confirms the details. Replace representative stock photos with original R Fitness photographs before publishing.
 
 ## MVP included
 
@@ -105,5 +106,6 @@ The initial content uses the public business listing for the gym's name, address
 - Admin enquiry inbox with status updates
 - Admin membership-plan management
 - Docker, database migrations, health check and Render Blueprint
+- Explicit PostgreSQL Row Level Security on application tables
 
 Member accounts, payments, attendance, trainer management UI and class booking are future phases.

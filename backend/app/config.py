@@ -6,8 +6,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     app_env: str = "development"
     database_url: str = ""
-    admin_email: str = ""
-    admin_password_hash: str = ""
+    admin_email: str = "admin@rfitness.local"
+    admin_password: str = ""
     jwt_secret: str = ""
     cors_origins: str = "http://localhost:5173"
 

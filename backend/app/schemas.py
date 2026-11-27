@@ -30,8 +30,8 @@ class LeadCreate(BaseModel):
     @classmethod
     def validate_phone(cls, value: str) -> str:
         value = value.strip()
-        digits = re.sub(r"\\D", "", value)
-        if not re.fullmatch(r"[0-9+().\\-\\s]{7,32}", value) or not 7 <= len(digits) <= 15:
+        digits = re.sub(r"\D", "", value)
+        if not re.fullmatch(r"[0-9+().\-\s]{7,32}", value) or not 7 <= len(digits) <= 15:
             raise ValueError("Enter a valid phone number, including country code if needed.")
         return value
 

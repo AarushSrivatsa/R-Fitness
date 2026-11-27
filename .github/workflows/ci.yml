@@ -20,7 +20,7 @@ jobs:
           python-version: '3.12'
       - run: pip install -r requirements-dev.txt
       - run: pytest
-      - run: docker build --tag r-fitness-api:ci .
+      - run: docker build --file Dockerfile --tag r-fitness:ci ..
 
   frontend:
     runs-on: ubuntu-latest

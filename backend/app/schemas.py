@@ -1,8 +1,9 @@
 from datetime import datetime
 from decimal import Decimal
+import re
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator
 
 
 class ORMModel(BaseModel):
@@ -12,25 +13,40 @@ class ORMModel(BaseModel):
 class LeadCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=120)
     phone: str = Field(min_length=7, max_length=32)
-    email: str | None = Field(default=None, max_length=254)
+    email: EmailStr | None = Field(default=None, max_length=254)
     fitness_goal: str | None = Field(default=None, max_length=120)
     preferred_contact: Literal["whatsapp", "phone", "email"] = "whatsapp"
     message: str | None = Field(default=None, max_length=2000)
 
-    @field_validator("full_name", "phone")
+    @field_validator("full_name")
     @classmethod
-    def strip_required_text(cls, value: str) -> str:
+    def strip_required_name(cls, value: str) -> str:
         value = value.strip()
         if not value:
-            raise ValueError("This field cannot be blank.")
+            raise ValueError("Name cannot be blank.")
         return value
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, value: str) -> str:
+        value = value.strip()
+        digits = re.sub(r"\\D", "", value)
+        if not re.fullmatch(r"[0-9+().\\-\\s]{7,32}", value) or not 7 <= len(digits) <= 15:
+            raise ValueError("Enter a valid phone number, including country code if needed.")
+        return value
+
+    @model_validator(mode="after")
+    def require_email_for_email_contact(self):
+        if self.preferred_contact == "email" and self.email is None:
+            raise ValueError("An email address is required when email is the preferred contact method.")
+        return self
 
 
 class LeadOut(ORMModel):
     id: int
     full_name: str
     phone: str
-    email: str | None
+    email: EmailStr | None
     fitness_goal: str | None
     preferred_contact: str
     message: str | None

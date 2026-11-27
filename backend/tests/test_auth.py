@@ -1,6 +1,5 @@
 from fastapi.testclient import TestClient
 import jwt
-from pwdlib import PasswordHash
 
 from app.config import settings
 from app.main import app
@@ -11,11 +10,7 @@ TEST_PASSWORD = "correct-horse-battery-staple-2026"
 
 def configure_admin(monkeypatch):
     monkeypatch.setattr(settings, "admin_email", "owner@rfitness.example")
-    monkeypatch.setattr(
-        settings,
-        "admin_password_hash",
-        PasswordHash.recommended().hash(TEST_PASSWORD),
-    )
+    monkeypatch.setattr(settings, "admin_password", TEST_PASSWORD)
     monkeypatch.setattr(settings, "jwt_secret", "test-only-secret-that-is-long-enough-123456")
 
 

@@ -5,8 +5,8 @@ services:
     plan: free
     region: singapore
     rootDir: backend
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     healthCheckPath: /healthz
     autoDeployTrigger: commit
     envVars:
@@ -28,7 +28,7 @@ services:
     runtime: static
     rootDir: frontend
     buildCommand: npm ci && npm run build
-    staticPublishPath: ./dist
+    staticPublishPath: ./frontend/dist
     autoDeployTrigger: commit
     routes:
       - type: rewrite

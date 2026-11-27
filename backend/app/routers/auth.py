@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+from functools import lru_cache
 import secrets
 
 import jwt
@@ -13,13 +14,19 @@ password_hasher = PasswordHash.recommended()
 TOKEN_LIFETIME_SECONDS = 8 * 60 * 60
 
 
+@lru_cache(maxsize=4)
+def get_configured_password_hash(plain_password: str) -> str:
+    """Hash the Render-stored password in process memory; never persist the hash."""
+    return password_hasher.hash(plain_password)
+
+
 @router.post("/login", response_model=TokenResponse)
 def login(payload: AdminLogin) -> TokenResponse:
     configured_email = settings.admin_email.strip().lower()
-    encoded_password_hash = settings.admin_password_hash
+    plain_password = settings.admin_password
     if (
         not configured_email
-        or not encoded_password_hash
+        or not plain_password
         or not settings.jwt_secret
         or len(settings.jwt_secret) < 32
     ):
@@ -29,11 +36,14 @@ def login(payload: AdminLogin) -> TokenResponse:
         )
 
     try:
-        password_matches = password_hasher.verify(payload.password, encoded_password_hash)
+        password_matches = password_hasher.verify(
+            payload.password,
+            get_configured_password_hash(plain_password),
+        )
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Admin password hash configuration is invalid.",
+            detail="Admin password configuration is invalid.",
         ) from exc
 
     email_matches = secrets.compare_digest(

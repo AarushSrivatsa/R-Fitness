@@ -1,38 +1,23 @@
 services:
   - type: web
-    name: r-fitness-api
+    name: r-fitness
     runtime: docker
     plan: free
     region: singapore
     dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerContext: .
     healthCheckPath: /healthz
     autoDeployTrigger: commit
     envVars:
       - key: DATABASE_URL
         sync: false
       - key: ADMIN_EMAIL
-        sync: false
-      - key: ADMIN_PASSWORD_HASH
-        sync: false
+        value: admin@rfitness.local
+      - key: ADMIN_PASSWORD
+        generateValue: true
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: CORS_ORIGINS
-        sync: false
+        value: http://localhost:5173
       - key: APP_ENV
         value: production
-
-  - type: web
-    name: r-fitness-web
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install --no-audit --no-fund && npm run build
-    staticPublishPath: ./dist
-    autoDeployTrigger: commit
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_BASE_URL
-        sync: false

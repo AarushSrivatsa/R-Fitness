@@ -1,8 +1,8 @@
 """Enable Row Level Security on all application tables.
 
-No anon/authenticated policies are created: browser clients use Supabase Auth,
-while all application data flows through the FastAPI API with server-side
-authorization. The API's private PostgreSQL connection uses the table owner.
+No browser-facing policies are created. Browser requests access application
+data only through FastAPI, which connects using private server-side PostgreSQL
+credentials and performs authorization before admin operations.
 """
 
 from alembic import op

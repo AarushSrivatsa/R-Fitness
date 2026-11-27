@@ -1,5 +1,6 @@
 .git
 .venv
+venv
 __pycache__/
 *.py[cod]
 .env
@@ -9,3 +10,4 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+tests/

@@ -10,6 +10,17 @@ class ORMModel(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class AdminLogin(BaseModel):
+    email: EmailStr
+    password: str = Field(min_length=12, max_length=256)
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"
+    expires_in: int
+
+
 class LeadCreate(BaseModel):
     full_name: str = Field(min_length=2, max_length=120)
     phone: str = Field(min_length=7, max_length=32)
@@ -30,8 +41,8 @@ class LeadCreate(BaseModel):
     @classmethod
     def validate_phone(cls, value: str) -> str:
         value = value.strip()
-        digits = re.sub(r"\D", "", value)
-        if not re.fullmatch(r"[0-9+().\-\s]{7,32}", value) or not 7 <= len(digits) <= 15:
+        digits = re.sub(r"\\D", "", value)
+        if not re.fullmatch(r"[0-9+().\\-\\s]{7,32}", value) or not 7 <= len(digits) <= 15:
             raise ValueError("Enter a valid phone number, including country code if needed.")
         return value
 

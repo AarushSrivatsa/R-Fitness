@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import type { Session } from '@supabase/supabase-js'
 import { apiRequest } from '../lib/api'
-import { supabase } from '../lib/supabase'
+
+type AdminSession = { access_token: string; token_type: 'bearer'; expires_in: number }
 
 type Lead = {
   id: number
@@ -30,7 +30,7 @@ type Plan = {
 
 type Overview = { total_leads: number; new_leads: number; active_plans: number }
 
-const session = ref<Session | null>(null)
+const session = ref<AdminSession | null>(null)
 const email = ref('')
 const password = ref('')
 const leads = ref<Lead[]>([])
@@ -71,19 +71,15 @@ async function loadDashboard() {
 }
 
 async function login() {
-  if (!supabase) {
-    error.value = 'Add the Supabase URL and anon/publishable key to the frontend environment first.'
-    return
-  }
   busy.value = true
   error.value = ''
   try {
-    const { data, error: authError } = await supabase.auth.signInWithPassword({
-      email: email.value,
-      password: password.value,
+    const result = await apiRequest<AdminSession>('/api/v1/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: email.value, password: password.value }),
     })
-    if (authError) throw authError
-    session.value = data.session
+    session.value = result
+    sessionStorage.setItem('rf_admin_session', JSON.stringify(result))
     password.value = ''
     await loadDashboard()
   } catch (err) {
@@ -93,12 +89,13 @@ async function login() {
   }
 }
 
-async function logout() {
-  await supabase?.auth.signOut()
+function logout() {
+  sessionStorage.removeItem('rf_admin_session')
   session.value = null
   leads.value = []
   plans.value = []
   notice.value = ''
+  error.value = ''
 }
 
 async function updateStatus(leadId: number, event: Event) {
@@ -169,10 +166,17 @@ function formatDate(value: string) {
 }
 
 onMounted(async () => {
-  if (!supabase) return
-  const { data } = await supabase.auth.getSession()
-  session.value = data.session
-  if (session.value) await loadDashboard()
+  const savedSession = sessionStorage.getItem('rf_admin_session')
+  if (!savedSession) return
+  try {
+    const parsed = JSON.parse(savedSession) as AdminSession
+    if (typeof parsed.access_token !== 'string' || !parsed.access_token) throw new Error('Invalid saved session')
+    session.value = parsed
+    await loadDashboard()
+  } catch {
+    sessionStorage.removeItem('rf_admin_session')
+    session.value = null
+  }
 })
 </script>
 
@@ -191,17 +195,16 @@ onMounted(async () => {
       <div class="admin-login-card">
         <div class="section-kicker">R FITNESS / ADMIN</div>
         <h1>WELCOME<br /><span>BACK.</span></h1>
-        <p class="muted-copy">Sign in with the administrator account configured in Supabase.</p>
-        <div v-if="!supabase" class="form-feedback error-feedback mb-3">Supabase client settings are missing. Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.</div>
+        <p class="muted-copy">Sign in with the administrator credentials configured for this deployment.</p>
         <div v-if="error" class="form-feedback error-feedback mb-3">{{ error }}</div>
         <form @submit.prevent="login">
           <label class="form-label" for="admin-email">EMAIL</label>
           <input id="admin-email" v-model="email" class="form-control mb-3" type="email" autocomplete="username" required />
           <label class="form-label" for="admin-password">PASSWORD</label>
           <input id="admin-password" v-model="password" class="form-control mb-4" type="password" autocomplete="current-password" required />
-          <button class="btn btn-accent w-100" type="submit" :disabled="busy || !supabase">{{ busy ? 'SIGNING IN...' : 'SIGN IN' }} <i class="bi bi-arrow-right ms-2"></i></button>
+          <button class="btn btn-accent w-100" type="submit" :disabled="busy">{{ busy ? 'SIGNING IN...' : 'SIGN IN' }} <i class="bi bi-arrow-right ms-2"></i></button>
         </form>
-        <p class="form-note mt-3 mb-0">Admin permissions are checked again by the API. Supabase sign-in alone does not grant access.</p>
+        <p class="form-note mt-3 mb-0">Admin API access uses a signed session that expires after eight hours.</p>
       </div>
     </section>
 

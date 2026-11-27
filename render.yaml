@@ -4,7 +4,6 @@ services:
     runtime: docker
     plan: free
     region: singapore
-    rootDir: backend
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
     healthCheckPath: /healthz
@@ -26,8 +25,7 @@ services:
   - type: web
     name: r-fitness-web
     runtime: static
-    rootDir: frontend
-    buildCommand: npm ci && npm run build
+    buildCommand: cd frontend && npm install --no-audit --no-fund && npm run build
     staticPublishPath: ./frontend/dist
     autoDeployTrigger: commit
     routes:

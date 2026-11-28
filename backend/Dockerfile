@@ -40,5 +40,5 @@ COPY --from=frontend-builder --chown=app:app /frontend/dist ./frontend-dist
 USER app
 EXPOSE 10000
 
-# Apply schema migrations before starting the combined API + website server.
-CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]
+# Migrate, generate the one-time administrator login if needed, then serve Vue + FastAPI.
+CMD ["sh", "-c", "alembic upgrade head && python -m app.bootstrap_admin && exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-10000}"]

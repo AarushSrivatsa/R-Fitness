@@ -16,6 +16,16 @@ class TimestampMixin:
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now, nullable=False)
 
 
+class AdminCredential(Base):
+    __tablename__ = "app_admin_credentials"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, default=1)
+    admin_email: Mapped[str] = mapped_column(String(254), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    jwt_secret: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+
 class Lead(TimestampMixin, Base):
     __tablename__ = "leads"
 

@@ -11,13 +11,3 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
-      - key: ADMIN_EMAIL
-        value: admin@rfitness.local
-      - key: ADMIN_PASSWORD
-        generateValue: true
-      - key: JWT_SECRET
-        generateValue: true
-      - key: CORS_ORIGINS
-        value: http://localhost:5173
-      - key: APP_ENV
-        value: production

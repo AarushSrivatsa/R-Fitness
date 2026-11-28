@@ -195,7 +195,7 @@ onMounted(async () => {
       <div class="admin-login-card">
         <div class="section-kicker">R FITNESS / ADMIN</div>
         <h1>WELCOME<br /><span>BACK.</span></h1>
-        <p class="muted-copy">Sign in with the administrator credentials configured for this deployment.</p>
+        <p class="muted-copy">Sign in with the one-time administrator credentials printed in the first successful deployment logs.</p>
         <div v-if="error" class="form-feedback error-feedback mb-3">{{ error }}</div>
         <form @submit.prevent="login">
           <label class="form-label" for="admin-email">EMAIL</label>

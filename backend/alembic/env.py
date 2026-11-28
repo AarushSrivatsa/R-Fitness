@@ -11,8 +11,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-if settings.database_url:
-    config.set_main_option("sqlalchemy.url", driver_url(settings.database_url).replace("%", "%%"))
+if not settings.database_url:
+    raise RuntimeError("DATABASE_URL is required. Set it to your Neon PostgreSQL connection string.")
+
+config.set_main_option("sqlalchemy.url", driver_url(settings.database_url).replace("%", "%%"))
 
 target_metadata = Base.metadata
 
